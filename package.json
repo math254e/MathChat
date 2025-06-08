@@ -24,11 +24,11 @@
 		"svelte": "^5.0.0",
 		"svelte-check": "^4.0.0",
 		"tailwindcss": "^4.0.0",
-		"typescript": "^5.0.0",
-		"vite": "^6.2.6"
+		"typescript": "^5.0.0"
 	},
 	"dependencies": {
 		"convex": "^1.24.8",
-		"convex-svelte": "^0.0.11"
+		"convex-svelte": "^0.0.11",
+		"vite": "^6.2.6"
 	}
 }
