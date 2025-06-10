@@ -1,14 +1,14 @@
+import { getAuthUserId } from "@convex-dev/auth/server";
 import { query } from "./_generated/server";
-import { v } from "convex/values";
 
-//get user name
+//get user data
 export const get = query({
 	args: {},
 	handler: async (ctx, args) => {
-		const user = await ctx.auth.getUserIdentity();
-		if (!user) {
-			return null;
-		}
-		return user.name;
+		const userId = await getAuthUserId(ctx);
+		if (userId === null) {
+      throw new Error("Unauthenticated call");
+    }
+    return await ctx.db.get(userId);
 	}
 });
