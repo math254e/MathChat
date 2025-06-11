@@ -9,30 +9,36 @@ const openai = new OpenAI({
 
 export const POST: RequestHandler = async ({ request }) => {
   try {
-    const { message, threadId, model } = await request.json();
+    const { userMessage, aiResponse } = await request.json();
 
     const completion = await openai.chat.completions.create({
-      model: model || 'gpt-4.1-nano',
+      model: 'gpt-4.1-nano',
       messages: [
         {
           role: 'user',
-          content: message
+          content: `Based on this conversation, generate a short, descriptive name (max 5 words) for the thread.
+          Focus on the main topic or purpose of the conversation.
+
+          User: ${userMessage}
+          Assistant: ${aiResponse}
+
+          Thread name:`
         }
       ]
     });
 
-    const response = completion.choices[0]?.message?.content;
+    const threadName = completion.choices[0]?.message?.content?.trim();
 
-    if (!response) {
-      throw new Error('No response from OpenAI');
+    if (!threadName) {
+      throw new Error('Failed to generate thread name');
     }
 
     return json({
       success: true,
-      response
+      name: threadName
     });
   } catch (error) {
-    console.error('Error in chat endpoint:', error);
+    console.error('Error generating thread name:', error);
     return json(
       {
         success: false,
@@ -41,5 +47,5 @@ export const POST: RequestHandler = async ({ request }) => {
       { status: 500 }
     );
   }
-}; 
+};
 

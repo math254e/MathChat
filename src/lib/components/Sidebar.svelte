@@ -114,7 +114,7 @@
               class="btn btn-ghost btn-lg btn-block text-left font-normal group {page.url.pathname === `/thread/${thread.id}` ? 'btn-active' : ''}"
               data-sveltekit-preload-data="hover">
               <span class="flex items-center w-full">
-                <span class="text-base flex-1 truncate">{thread?.name || `Thread ${thread?.id?.slice(0, 8) || ''}`}</span>
+                <span class="text-base flex-1 truncate">{thread?.name || 'New Chat'}</span>
               </span>
               <button
                 class="opacity-0 text-base-content/60 w-7 h-7 absolute right-7 group-hover:bg-base-300 group-hover:opacity-100 hover:text-error"

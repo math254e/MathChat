@@ -80,6 +80,26 @@
       tempMessage = null;
       isLoading = false;
 
+      //generate thread name from a endpoint
+      const threadName = await fetch('/api/threadName', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userMessage: message,
+          aiResponse: data.response
+        })
+      });
+      const threadNameData = await threadName.json();
+
+      //update thread name
+      await client.mutation(api.thread.update_name, {
+        thread_id: page.params.id as any,
+        name: threadNameData.name
+      });
+
+
     } catch (err) {
       console.error('Error in sendMessage:', err);
       error = err instanceof Error ? err.message : 'An unexpected error occurred';

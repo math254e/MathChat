@@ -148,11 +148,11 @@ export const add_message = mutation({
 
 export const update_name = mutation({
   args: {
-    id: v.id("threads"),
+    thread_id: v.id("threads"),
     name: v.string(),
   },
   handler: async (ctx, args) => {
-    await ctx.db.patch(args.id, { name: args.name });
+    await ctx.db.patch(args.thread_id, { name: args.name });
   },
 });
 
