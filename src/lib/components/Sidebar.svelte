@@ -11,7 +11,6 @@
   const isAuthenticating = $derived(useAuth().isLoading);
   
   const client = useConvexClient();
-
   const user = useQuery(api.user.get, {});
 
   // Define the static navigation items
@@ -23,11 +22,11 @@
   let error = $state('');
 
   // Sort threads by last_message_at in descending order
-  const sortedThreads = $derived([...threads].sort((a, b) => {
+  const sortedThreads = $derived(threads?.length ? [...threads].sort((a, b) => {
     const dateA = a.last_message_at ? new Date(a.last_message_at).getTime() : 0;
     const dateB = b.last_message_at ? new Date(b.last_message_at).getTime() : 0;
     return dateB - dateA;
-  }));
+  }) : []);
 
   function isTextTruncated(element: HTMLElement): boolean {
     return element.scrollWidth > element.clientWidth;
