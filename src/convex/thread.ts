@@ -58,7 +58,10 @@ export const get = query({
     if (thread_data.user !== userId) throw new Error("Unauthorized");
     
 
-    const messages = await ctx.db.query("messages").filter((q) => q.eq(q.field("thread_id"), args.thread_id)).collect();
+    const messages = await ctx.db.query("messages")
+      .filter((q) => q.eq(q.field("thread_id"), args.thread_id))
+      .order("asc")
+      .collect();
     const return_item ={
       data: {
         id: thread_data._id,

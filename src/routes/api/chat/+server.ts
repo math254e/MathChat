@@ -2,23 +2,43 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import OpenAI from 'openai';
 import { OPENAI_API_KEY } from '$env/static/private';
+import { createConvexAuthHandlers } from '@mmailaender/convex-auth-svelte/sveltekit/server';
+import { api } from '../../../convex/_generated/api.js';
+import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 
 const openai = new OpenAI({
   apiKey: OPENAI_API_KEY
 });
 
-export const POST: RequestHandler = async ({ request }) => {
-  try {
-    const { message, threadId, model } = await request.json();
+const { createConvexHttpClient } = createConvexAuthHandlers();
 
+export const POST: RequestHandler = async (event) => {
+  try {
+    const { message, threadId, model } = await event.request.json();
+
+    // Get thread messages from Convex using server-side client
+    const convex = await createConvexHttpClient(event);
+    const thread = await convex.query(api.thread.get, { thread_id: threadId });
+
+    if (!thread || !thread.messages) {
+      throw new Error('Thread not found or has no messages');
+    }
+
+    // Format messages for OpenAI API
+    const messages: ChatCompletionMessageParam[] = thread.messages.map((msg: { role: string; content: string }) => ({
+      role: msg.role as 'user' | 'assistant' | 'system',
+      content: msg.content
+    }));
+
+    // Add the new user message
+    messages.push({
+      role: 'user',
+      content: message
+    });
+    
     const completion = await openai.chat.completions.create({
       model: model || 'gpt-4.1-nano',
-      messages: [
-        {
-          role: 'user',
-          content: message
-        }
-      ]
+      messages
     });
 
     const response = completion.choices[0]?.message?.content;
