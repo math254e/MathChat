@@ -10,7 +10,7 @@
     description?: string;
   }
 
-  let { selectedModel = $bindable(), isLoading, error, models } = $props();
+  let { selectedModel = $bindable(), isLoading, error, models, isOpen } = $props();
 
   let popoverOpen = $state(false);
   let buttonRef = $state<HTMLButtonElement | null>(null);
@@ -51,7 +51,7 @@
   let selected = $derived(models.find((m: Model) => m.model_id === selectedModel));
 </script>
 
-<div class="relative top-4 w-fit transition-all duration-300 left-6">
+<div class="relative top-4 w-fit transition-all duration-300 left-6 {!isOpen ? 'translate-x-32' : ''}">
   <button
     bind:this={buttonRef}
     class="btn btn-ghost h-10 flex items-center justify-between px-4 rounded-lg  select-none text-base-content disabled:bg-base-300 disabled:text-base-content/60 disabled:cursor-not-allowed"

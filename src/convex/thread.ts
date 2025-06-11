@@ -129,3 +129,50 @@ export const update_model = mutation({
   },
 });
 
+export const add_message = mutation({
+  args: {
+    thread_id: v.id("threads"),
+    message: v.object({
+      role: v.string(),
+      content: v.string(),
+    }),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.insert("messages", {
+      thread_id: args.thread_id,
+      role: args.message.role,
+      content: args.message.content,
+    });
+  },
+});
+
+export const update_name = mutation({
+  args: {
+    id: v.id("threads"),
+    name: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.id, { name: args.name });
+  },
+});
+
+export const get_data = query({
+  args: {
+    id: v.id("threads"),
+  },
+  handler: async (ctx, args) => {
+    const data = await ctx.db.get(args.id);
+    if (!data) {
+      return null;
+    }
+    return {
+      id: data._id,
+      user: data.user,
+      model_id: data.model_id,
+      name: data.name,
+      created_at: data._creationTime,
+      last_message_at: data.last_message_at,
+      split_from: data.split_from
+    };
+  },
+});

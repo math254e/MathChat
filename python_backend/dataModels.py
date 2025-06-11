@@ -5,7 +5,9 @@ from typing import List
 class Model(BaseModel):
     id: str
     name: str
+    model_id: str
     description: str | None = None
+    provider: str
 
 class ChatRequest(BaseModel):
     message: str

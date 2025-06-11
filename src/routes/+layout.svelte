@@ -12,7 +12,6 @@
 	let sidebarOpen = $state(true);
 	let isLoading = $state(false);
 	let error = $state('');
-
 	let selectedModel = $state(data.user_model?.model_id ?? '');
 
   // Set up authentication (automatically initializes Convex client)
@@ -35,7 +34,7 @@
 <div class="flex min-h-dvh">
 	<Sidebar bind:isOpen={sidebarOpen} threads={threads} />
 	<main class="content flex-1 ml-64" class:sidebar-closed={!sidebarOpen}>
-		<ModelPicker bind:selectedModel={selectedModel} isLoading={isLoading} error={error} models={models} />
+		<ModelPicker bind:selectedModel={selectedModel} isLoading={isLoading} error={error} models={models} isOpen={sidebarOpen} />
 		{#if isAuthenticated}
 			{@render children()}
 		{:else}
