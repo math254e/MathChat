@@ -1,3 +1,5 @@
+
+
 import { createConvexAuthHandlers } from '@mmailaender/convex-auth-svelte/sveltekit/server';
 import type { LayoutServerLoad } from './$types';
 import { api } from '../convex/_generated/api.js';
@@ -23,7 +25,6 @@ export const load: LayoutServerLoad = async (event) => {
       console.error('Error loading threads:', error);
     }
   }
-
   return { 
     authState,
     threads,
@@ -31,4 +32,3 @@ export const load: LayoutServerLoad = async (event) => {
     user_model
   };
 };
-

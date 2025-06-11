@@ -22,6 +22,17 @@
   let { isOpen = $bindable(true), threads } = $props();
   let error = $state('');
 
+  // Sort threads by last_message_at in descending order
+  const sortedThreads = $derived([...threads].sort((a, b) => {
+    const dateA = a.last_message_at ? new Date(a.last_message_at).getTime() : 0;
+    const dateB = b.last_message_at ? new Date(b.last_message_at).getTime() : 0;
+    return dateB - dateA;
+  }));
+
+  function isTextTruncated(element: HTMLElement): boolean {
+    return element.scrollWidth > element.clientWidth;
+  }
+
 
   function delete_thread(threadId: string, event: MouseEvent) {
     event.preventDefault(); // Prevent navigation when clicking delete
@@ -107,14 +118,25 @@
         Your Threads
       </div>
       <ul class="list-none p-0 m-0">
-        {#each threads as thread}
+        {#each sortedThreads as thread}
           <li class="mb-2">
             <a
               href="/thread/{thread.id}"
               class="btn btn-ghost btn-lg btn-block text-left font-normal group {page.url.pathname === `/thread/${thread.id}` ? 'btn-active' : ''}"
               data-sveltekit-preload-data="hover">
               <span class="flex items-center w-full">
-                <span class="text-base flex-1 truncate">{thread?.name || 'New Chat'}</span>
+                <span 
+                  class="text-base flex-1 truncate" 
+                  title={thread?.name || 'New Chat'}
+                  role="button"
+                  tabindex="0"
+                  onmouseenter={(e) => {
+                    const target = e.currentTarget;
+                    if (!isTextTruncated(target)) {
+                      target.title = '';
+                    }
+                  }}
+                >{thread?.name || 'New Chat'}</span>
               </span>
               <button
                 class="opacity-0 text-base-content/60 w-7 h-7 absolute right-7 group-hover:bg-base-300 group-hover:opacity-100 hover:text-error"

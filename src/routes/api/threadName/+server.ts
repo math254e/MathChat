@@ -18,6 +18,7 @@ export const POST: RequestHandler = async ({ request }) => {
           role: 'user',
           content: `Based on this conversation, generate a short, descriptive name (max 5 words) for the thread.
           Focus on the main topic or purpose of the conversation.
+          If one or two words stand out, make sure to start with them.
 
           User: ${userMessage}
           Assistant: ${aiResponse}

@@ -11,7 +11,6 @@
   const authToken = useAuth().token;
   const client = useConvexClient();
 
-  let tempMessage = $state<string | null>(null);
   let isLoading = $state(false);
   let error = $state<string | null>(null);
   let selectedModel = "gpt-4.1-nano";
@@ -37,8 +36,13 @@
       isLoading = true;
       error = null;
 
-      // Add temporary user message
-      tempMessage = message;
+      await client.mutation(api.thread.add_message, {
+        thread_id: page.params.id as any,
+        message: {
+          role: 'user',
+          content: message
+        }
+      });
 
       //send to server and get response
       const response = await fetch('/api/chat', {
@@ -52,59 +56,47 @@
           model: selectedModel
         })
       });
-
       const data = await response.json();
 
       if (!data.success) {
         throw new Error(data.error || 'Failed to get response');
       }
 
-      // Add both messages to the thread using Convex mutation
-      await client.mutation(api.thread.add_message, {
-        thread_id: page.params.id as any,
-        message: {
-          role: 'user',
-          content: message
-        }
-      });
-
+      // Add response message to the thread
       await client.mutation(api.thread.add_message, {
         thread_id: page.params.id as any,
         message: {
           role: 'assistant',
-          content: data.response
+          content: data.response_text
         }
       });
 
-      // Clear temporary message
-      tempMessage = null;
+      //enable the input bar
       isLoading = false;
 
-      //generate thread name from a endpoint
-      const threadName = await fetch('/api/threadName', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userMessage: message,
-          aiResponse: data.response
-        })
-      });
-      const threadNameData = await threadName.json();
+      //generate thread name from a endpoint if no name is set
+      if (!thread.data?.data?.name) {
+        const threadName = await fetch('/api/threadName', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userMessage: message,
+            aiResponse: data.response_text
+          })
+        });
+        const threadNameData = await threadName.json();
 
-      //update thread name
-      await client.mutation(api.thread.update_name, {
-        thread_id: page.params.id as any,
-        name: threadNameData.name
-      });
-
-
+        //update thread name
+        await client.mutation(api.thread.update_name, {
+          thread_id: page.params.id as any,
+            name: threadNameData.name
+        });
+      }
     } catch (err) {
       console.error('Error in sendMessage:', err);
       error = err instanceof Error ? err.message : 'An unexpected error occurred';
-      // Clear the temporary message on error
-      tempMessage = null;
       isLoading = false;
     }
   }
@@ -120,10 +112,10 @@
   {/if}
   
   <div class="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
-    {#each messages as message}
+    {#each messages as message, i}
       {#if message.role === 'user'}
         <div class="flex justify-end">
-          <div class="bg-primary text-primary-content px-4 py-3 rounded-2xl max-w-[70%] shadow-md">
+          <div class="bg-primary text-primary-content px-4 py-3 rounded-2xl max-w-[70%] {i === messages.length - 1 ? 'opacity-50' : ''} shadow-md">
             {message.content}
           </div>
         </div>
@@ -141,14 +133,6 @@
         </div>
       {/if}
     {/each}
-      
-    {#if tempMessage}
-      <div class="flex justify-end">
-        <div class="bg-primary text-primary-content px-4 py-3 rounded-2xl max-w-[70%] opacity-50 shadow-md">
-          {tempMessage}
-        </div>
-      </div>
-    {/if}
   </div>
   
   <div class="p-4 border-t border-base-300 bg-base-100">

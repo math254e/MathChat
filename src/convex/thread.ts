@@ -146,6 +146,11 @@ export const add_message = mutation({
       role: args.message.role,
       content: args.message.content,
     });
+
+    // Update the thread's last_message_at timestamp
+    await ctx.db.patch(args.thread_id, {
+      last_message_at: Date.now()
+    });
   },
 });
 
